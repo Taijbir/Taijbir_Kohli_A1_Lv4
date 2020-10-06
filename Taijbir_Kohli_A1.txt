@@ -1,0 +1,742 @@
+import java.util.Scanner;
+import java.util.Random;
+
+
+public class Taijbir_Kohli_A1 {
+	public static void main(String[] args) {
+				
+		char[][] grid = new char[16][16];
+		
+		//initialize array
+		for (int row = 0; row < grid.length; row++){
+			for (int col = 0; col < grid[0].length; col++){
+				grid[row][col] = ' ';
+			}
+		}
+		
+		//Starting Variables
+		int turn = 0;
+		char player = 'X';
+		boolean winner = false;		
+		
+		//Main loop
+		mainLoop:
+		while (winner == false && turn <= 65){
+
+			//switch between CPU and player
+			if (turn%2 == 0){
+				player = 'X';
+				Scanner in = new Scanner(System.in);
+				boolean validPlay;
+				int playRow;
+				int playCol;
+				do {
+					display(grid);
+					//System.out.println("it is the " + turn + " turn");
+
+					System.out.print("Player " + player + ", choose a row: ");
+					playRow = in.nextInt();
+					System.out.print("Player " + player + ", choose a column: ");
+					playCol = in.nextInt();
+			
+					
+					//look for any full columns or rows
+					validPlay = validate(playRow,grid);
+					
+				} while (validPlay == false);
+				
+				//place the checker 
+				for (int row = grid.length-1,  col = grid.length-1; row >= 0 && col >= 0; row--, col--){
+					if(grid[row][playRow] == ' ' || grid[col][playCol] == ' ' ){
+						if (grid[playRow][col] != ' ') {
+							continue mainLoop;
+						} else if (grid[row][playCol] != ' ') {
+							continue mainLoop;
+						}
+						grid[playCol][playRow] = player;
+						break;
+					}
+				}
+				
+				//determine if there is a winner
+				winner = isWinner(player,grid);
+			
+				//CPU	
+			}else{
+				player = 'O';
+				winner = isWinner(player,grid);
+
+
+				
+				if (turn > 1) {
+					cpuWin(grid);
+					nextMove(turn, grid);
+				} else {
+					firstMove(grid);
+				}
+			}
+		turn++;		
+	}
+		
+		//display the grid
+		display(grid);
+		
+		
+		if (winner){
+			if (player=='O'){
+				System.out.println("CPU won");
+			}else{
+				System.out.println("You won!");
+			}
+		}else{
+			System.out.println("Tie game");
+		}
+		
+	}	
+
+	
+	
+	//lays out the the game board
+	public static void display(char[][] grid){
+		System.out.println("   0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15");
+		System.out.println("-------------------------------------------");
+		for (int row = 0; row < grid.length; row++){
+			if (row > 9) {
+				System.out.print(row);
+			} else {
+				System.out.print(row +" ");
+			}
+			System.out.print("|");
+			for (int col = 0; col < grid[0].length; col++){
+				System.out.print(grid[row][col]);
+				System.out.print("|");
+			}
+			System.out.println();
+			System.out.println("-------------------------------------------");
+		}
+		System.out.println("   0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15");
+		System.out.println();
+	}
+	
+	//checks for valid columns and rows
+	public static boolean validate(int column, char[][] grid){
+		//valid column?
+		if (column < 0 || column > grid[0].length){
+			return false;
+		}
+		
+		//full column?
+		if (grid[0][column] != ' '){
+			return false;
+		}
+		
+		return true;
+	}
+	
+	//Dictates CPU first move by randomly selecting a square within one square off the players first move 
+	public static void firstMove(char[][] grid) {
+		outer:
+			while (true){
+				Random rand = new Random();
+				int randNum = rand.nextInt(8);
+				
+				//Places piece down of the players first move  
+				if(randNum == 0) {
+					for(int row = 0; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length; col++){
+							//System.out.println("ok");
+							if(grid[row][col] == 'X') {
+								//System.out.println("hello");
+								if (row == 15 || grid[row+1][col] != ' ') {
+									//System.out.println("Loop restart");
+									continue outer;
+								} else {
+									grid[row+1][col] = 'O';
+									break outer;
+								}
+							}
+						}
+					}
+					break outer;
+					
+					//Places piece up of the players first move 
+				} else if(randNum == 1) {
+					for(int row = 0; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length; col++){
+							if(grid[row][col] == 'X') {
+								if (row == 0 || grid[row-1][col] != ' ') {
+									//System.out.println("Loop restart");
+									continue outer;
+								} else {
+									grid[row-1][col] = 'O';
+									break outer;
+								}
+							}
+					}
+				}
+					break outer;
+				//Places piece right of the players first move 	
+				} else if(randNum == 2) {
+					for(int row = 0; row<grid.length; row++){
+						for (int col = 0;col < grid[0].length;col++){
+							//System.out.println("ok");
+							if(grid[row][col] == 'X') {
+								//System.out.println("hello");
+								if (col == 15 || grid[row][col+1] != ' ') {
+									//System.out.println("Loop restart");
+									continue outer;
+								} else {
+								//System.out.println("noting wrong");
+									grid[row][col+1] = 'O';
+									break outer;
+								}
+							}
+								
+					}
+				}
+					break outer;
+				//Places piece left of the players first move 	
+				} else if(randNum == 3) {
+					for(int row = 0; row<grid.length; row++){
+						for (int col = 0;col < grid[0].length;col++){
+							if(grid[row][col] == 'X') {
+								if (col == 0 || grid[row][col-1] != ' ') {
+									//System.out.println("Loop restart");
+									continue outer;
+								} else {
+									grid[row][col-1] = 'O';
+									break outer;
+								}
+							}
+					}
+				}
+					break outer;
+				//Places piece down and to the right of the players first move 	
+				} else if(randNum == 4) {
+					for(int row = 0; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length; col++){
+							if(grid[row][col] == 'X') {
+								if (row == 15 || col == 15) {
+									//System.out.println("Loop restart");
+									continue outer;
+								}else if (grid[row+1][col+1] != ' ') {
+									continue outer;
+								} else {
+									grid[row+1][col+1] = 'O';
+									break outer;
+								}
+							}
+					}
+				}
+					break outer;
+				//Places piece up and to the left of the players first move 	
+				} else if(randNum == 5) {
+					for(int row = 3; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length; col++){
+							if(grid[row][col] == 'X') {
+								if (row == 0 || col == 0) {
+									//System.out.println("Loop restart");
+									continue outer;
+								} else if (grid[row-1][col-1] != ' ') {
+									continue outer;
+								} else {
+									grid[row-1][col-1] = 'O';
+									break outer;
+								}
+							}
+					}
+				}
+					break outer;
+				//Places piece down and to the left of the players first move 	
+				}  else if(randNum == 6) {
+					for(int row = 0; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length; col++){
+						if(grid[row][col] == 'X') {
+							if (row == 15 || col == 0) {
+								//System.out.println("Loop restart");
+								continue outer;
+							} else if (grid[row+1][col-1] != ' ') {
+								continue outer;
+							} else {
+								grid[row+1][col-1] = 'O';
+								break outer;
+							}
+						}
+					}
+				}
+					break outer;
+				//Places piece up and to the right of the players first move 	
+				} else if(randNum == 7) {
+					for(int row = 3; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length ; col++){
+							if(grid[row][col] == 'X') {
+								if (row == 0 || col == 15) {
+									//System.out.println("Loop restart");
+									continue outer;
+								} else if (grid[row-1][col+1] != ' ') {
+									continue outer;
+								} else {
+									grid[row-1][col+1] = 'O';
+									break outer;
+								}
+							}
+					}
+				}
+					break outer;
+			}	
+		}
+	}
+	
+	//Dictates CPU's second move
+	public static void nextMove(int turn, char[][] grid) {
+		//Block player 2, 3, and 4 (block win) in a row, across
+		boolean run = true;
+		
+		boolean isEmpty = false;
+		
+		nextMoveLoop:
+		while (true) {
+			if (run == true) {
+				
+				outer:
+				while (true) {
+					for(int row = 0; row<grid.length; row++){
+						for (int col = 0;col < grid[0].length-4;col++) {
+							//Block player 4 in a row, across
+							if (grid[row][col] == 'X' && 
+									grid[row][col+1] == 'X'  && 
+									grid[row][col+2] == 'X'  && 
+									grid[row][col+3] == 'X')  {
+								isEmpty = true;
+								if (col == 15) {
+									grid[row][col-3] = 'O';
+									run = true;
+									break outer;
+								} else  if (col == 0 || grid[row][col-1] != ' ') {
+									grid[row][col+4] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row][col+4] = 'O';
+									run = true;
+									break outer;
+								} 
+							//Block player 3 in a row, across
+							} else if (grid[row][col] == 'X' && 
+									grid[row][col+1] == 'X'  && 
+									grid[row][col+2] == 'X')  {
+								isEmpty = true;
+								if (col == 15) {
+									grid[row][col-2] = 'O';
+									run = true;
+									break outer;
+								} else  if (col == 0 || grid[row][col-1] != ' ') {
+									grid[row][col+3] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row][col+3] = 'O';
+									run = true;
+									break outer;
+								}
+							//Block player 2 in a row, across
+							} else if (grid[row][col] == 'X'   && 
+										grid[row][col+1] == 'X'){
+								isEmpty = true;
+								if (col == 15 || grid[row][col+1] != ' ') {
+									grid[row][col-1] = 'O';
+									run = true;
+									break outer;
+								} else  if (col == 0 || grid[row][col-1] != ' ') {
+									grid[row][col+2] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row][col+2] = 'O';
+									run = true;
+									break outer;
+								} 
+							}
+						}
+					}
+					break;
+				}
+				//Block player 2, 3, and 4 in a row, up and down
+				outer:
+				while (true) {
+					for(int row = 0; row < grid.length - 4; row++){
+						for(int col = 0; col < grid[0].length; col++){
+							//Block player 4 in a row, up and down
+							if (grid[row][col] == 'X' && 
+									grid[row+1][col] == 'X'  && 
+									grid[row+2][col] == 'X'  && 
+									grid[row+3][col] == 'X')  {
+								isEmpty = true;
+								if (row == 15) {
+									grid[row-3][col] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || grid[row-1][col] != ' ') {
+									grid[row+4][col] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row+4][col] = 'O';
+									run = true;
+									break outer;
+								} 
+							//Block player 3 in a row, up and down
+							} else if (grid[row][col] == 'X' && 
+									grid[row+1][col] == 'X'  && 
+									grid[row+2][col] == 'X')  {
+								isEmpty = true;
+								//System.out.println("HLEOOOO");
+								if (row == 15) {
+									grid[row-2][col] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || grid[row-1][col] != ' ') {
+									grid[row+3][col] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row+3][col] = 'O';
+									run = true;
+									break outer;
+								}
+							//Block player 2 in a row, up and down
+							} else if (grid[row][col] == 'X'   && 
+										grid[row+1][col] == 'X'){
+								isEmpty = true;
+								if (row == 15 || grid[row+1][col] != ' ') {
+									grid[row-1][col] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || grid[row-1][col] != ' ') {
+									grid[row+2][col] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row+2][col] = 'O';
+									run = true;
+									break outer;
+								}
+							}
+						}
+					}	
+					break;
+				}
+				//Block player 2, 3, and 4 in a row, upwards diagonal
+				outer:
+				while (true) {
+					for(int row = 3; row < grid.length; row++){
+						for(int col = 0; col < grid[0].length - 4; col++){
+							//Block player 4 in a row, upwards diagonal
+							if (grid[row][col] == 'X'   && 
+								grid[row-1][col+1] == 'X' &&
+								grid[row-2][col+2] == 'X' &&
+								grid[row-3][col+3] == 'X') {
+								isEmpty = true;
+								if (row == 15 || col == 0) {
+									grid[row+3][col-3] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || col == 15 || grid[row+1][col-1] != ' ') {
+									grid[row-4][col+4] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row-4][col+4] = 'O';
+									run = true;
+									break outer;
+								} 
+							//Block player 3 in a row, upwards diagonal
+							} else if (grid[row][col] == 'X'   && 
+									grid[row-1][col+1] == 'X' &&
+									grid[row-2][col+2] == 'X')  {
+								isEmpty = true;
+								if (row == 15 || col == 0) {
+									grid[row+2][col-2] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || col == 15|| grid[row+1][col-1] != ' ') {
+									grid[row-3][col+3] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row-3][col+3] = 'O';
+									run = true;
+									break outer;
+								}
+							//Block player 2 in a row, upwards diagonal
+							} else if (grid[row][col] == 'X'   && 
+									   grid[row-1][col+1] == 'X'){
+								isEmpty = true;
+								if (row == 15 || col == 0 || grid[row+1][col-1] != ' ') {
+									grid[row-1][col] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || col == 15 || grid[row+1][col-1] != ' ') {
+									grid[row-2][col+2] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row-2][col+2] = 'O';
+									run = true;
+									break outer;
+								}
+							}
+						}
+					}	
+					break outer;
+				}
+				
+				//Block player 2, 3, and 4 in a row, downwards diagonal
+				outer:
+				while (true) {
+					for(int row = 0; row < grid.length - 3; row++){
+						for(int col = 0; col < grid[0].length - 4; col++){
+							//Block player 4 in a row, downwards diagonal
+							if (grid[row][col] == 'X'   && 
+								grid[row+1][col+1] == 'X' &&
+								grid[row+2][col+2] == 'X' &&
+								grid[row+3][col+3] == 'X') {
+								isEmpty = true;
+								if (row == 15 || col == 15) {
+									grid[row-3][col-3] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 15 || col == 15 || grid[row-1][col-1] != ' ') {
+									grid[row+4][col+4] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row+4][col+4] = 'O';
+									run = true;
+									break outer;
+								} 
+							//Block player 4 in a row, downwards diagonal
+							} else if (grid[row][col] == 'X'   && 
+									grid[row+1][col+1] == 'X' &&
+									grid[row+2][col+2] == 'X')  {
+								isEmpty = true;
+								//System.out.println("HLEOOOO");
+								if (row == 15 || col == 15) {
+									grid[row-2][col-2] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 15 || col == 15|| grid[row-1][col-1] != ' ') {
+									grid[row+3][col+3] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row+3][col+3] = 'O';
+									run = true;
+									break outer;
+								}
+							//Block player 2 in a row, downwards diagonal
+							} else if (grid[row][col] == 'X'   && 
+									   grid[row+1][col+1] == 'X'){
+								isEmpty = true;
+								if (row == 15 || col == 15 || grid[row-1][col-1] != ' ') {
+									grid[row-1][col-1] = 'O';
+									run = true;
+									break outer;
+								} else  if (row == 0 || col == 15 || grid[row-1][col-1] != ' ') {
+									grid[row+2][col+2] = 'O';
+									run = true;
+									break outer;
+								} else {
+									grid[row+2][col+2] = 'O';
+									run = true;
+									break outer;
+								}
+							}
+						}
+					}
+					break outer;
+				}
+				//if no blocks available, place randomly 
+				if (isEmpty == true) {
+					break nextMoveLoop;
+				} else {
+					run = false;
+					continue nextMoveLoop;
+				}
+				
+			} else {
+				//randomly placed 
+				Random rand = new Random();
+				int randRow= rand.nextInt(15);
+				int randCol= rand.nextInt(15);
+				if (grid[randRow][randRow] != ' ') {
+					run = false;
+					continue nextMoveLoop;
+				}
+				grid[randRow][randCol] = 'O';
+				break nextMoveLoop;
+			}
+		}
+	}
+	
+	//Allows CPU to go for the win when they have 4 in a row
+	public static void cpuWin(char[][] grid) {
+		//Allows CPU to go for the win when they have 4 in a row, Across
+		outer:
+		while (true) {
+			for(int row = 0; row<grid.length; row++){
+				for (int col = 0;col < grid[0].length-4;col++) {
+					//4 in a row across
+					if (grid[row][col] == 'O' && 
+							grid[row][col+1] == 'O'  && 
+							grid[row][col+2] == 'O'  && 
+							grid[row][col+3] == 'O')  {
+						if (col == 15) {
+							grid[row][col-3] = 'O';
+							break outer;
+						} else  if (col == 0 || grid[row][col-1] != ' ') {
+							grid[row][col+4] = 'O';
+							break outer;
+						} else {
+							grid[row][col+4] = 'O';
+							break outer;
+						} 
+					}
+				}	
+			}
+			break outer;
+		}
+	//Allows CPU to go for the win when they have 4 in a row, up and down
+		outer:
+		while (true) {
+			for(int row = 0; row < grid.length - 4; row++){
+				for(int col = 0; col < grid[0].length; col++){
+					//4 in a row up and down
+					if (grid[row][col] == 'O' && 
+							grid[row+1][col] == 'O'  && 
+							grid[row+2][col] == 'O'  && 
+							grid[row+3][col] == 'O')  {
+						if (row == 15) {
+							grid[row-3][col] = 'O';
+							break outer;
+						} else  if (row == 0 || grid[row-1][col] != ' ') {
+							grid[row+4][col] = 'O';
+							break outer;
+						} else {
+							grid[row+4][col] = 'O';
+							break outer;
+						} 
+					}
+				}
+			}
+			break outer;
+		}
+
+		//Allows CPU to go for the win when they have 4 in a row, upward diagonal
+		outer:
+		while (true) {
+			for(int row = 3; row < grid.length; row++){
+				for(int col = 0; col < grid[0].length - 4; col++){
+					//4 in a row upward diagonal
+					if (grid[row][col] == 'O'   && 
+						grid[row-1][col+1] == 'O' &&
+						grid[row-2][col+2] == 'O' &&
+						grid[row-3][col+3] == 'O') {
+						//System.out.println("HLEOOOO");
+						if (row == 15 || col == 0) {
+							grid[row+3][col-3] = 'O';
+							break outer;
+						} else  if (row == 0 || col == 15 || grid[row+1][col-1] != ' ') {
+							grid[row-4][col+4] = 'O';
+							break outer;
+						} else {
+							grid[row-4][col+4] = 'O';
+							break outer;
+						} 
+					}
+				}
+			}	
+			break outer;
+		}
+		//Allows CPU to go for the win when they have 4 in a row, downward diagonal
+		outer:
+		while (true) {
+			for(int row = 0; row < grid.length - 3; row++){
+				for(int col = 0; col < grid[0].length - 4; col++){
+					//4 in a row downward diagonal
+					if (grid[row][col] == 'O'   && 
+						grid[row+1][col+1] == 'O' &&
+						grid[row+2][col+2] == 'O' &&
+						grid[row+3][col+3] == 'O') {
+						if (row == 15 || col == 15) {
+							grid[row-3][col-3] = 'O';
+							break outer;
+						} else  if (row == 15 || col == 15 || grid[row-1][col-1] != ' ') {
+							grid[row+4][col+4] = 'O';
+							break outer;
+						} else {
+							grid[row+4][col+4] = 'O';
+							break outer;
+						} 
+					}
+				}	
+				break outer;
+			}
+		}
+		
+	}
+	
+	//dictates winner 
+ 	public static boolean isWinner(char player, char[][] grid){
+		//check for 5 across
+		for(int row = 0; row<grid.length; row++){
+			for (int col = 0;col < grid[0].length - 4;col++){
+				if (grid[row][col] == player   && 
+					grid[row][col+1] == player &&
+					grid[row][col+2] == player &&
+					grid[row][col+3] == player &&
+					grid[row][col+4] == player){
+					return true;
+				}
+			}			
+		}
+		//check for 5 up and down
+		for(int row = 0; row < grid.length - 4; row++){
+			for(int col = 0; col < grid[0].length; col++){
+				if (grid[row][col] == player   && 
+					grid[row+1][col] == player &&
+					grid[row+2][col] == player &&
+					grid[row+3][col] == player &&
+					grid[row+4][col] == player){
+					return true;
+				}
+			}
+		}
+		//check upward diagonal
+		for(int row = 3; row < grid.length; row++){
+			for(int col = 0; col < grid[0].length - 4; col++){
+				if (grid[row][col] == player   && 
+					grid[row-1][col+1] == player &&
+					grid[row-2][col+2] == player &&
+					grid[row-3][col+3] == player &&
+					grid[row-4][col+4] == player){
+					return true;
+				}
+			}
+		}
+		//check downward diagonal
+		for(int row = 0; row < grid.length - 3; row++){
+			for(int col = 0; col < grid[0].length - 4; col++){
+				if (grid[row][col] == player   && 
+					grid[row+1][col+1] == player &&
+					grid[row+2][col+2] == player &&
+					grid[row+3][col+3] == player &&
+					grid[row+4][col+4] == player){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+}
